@@ -1,17 +1,32 @@
 import {Book} from '../models/book';
 import {CollectionViewer, DataSource} from "@angular/cdk/collections";
-import {BehaviorSubject, Observable} from 'rxjs';
+import {BehaviorSubject, catchError, Observable, of} from 'rxjs';
+import {BooksService} from './books.service';
+import {BooksResponse} from '../models/books-response';
+import {inject} from '@angular/core';
+import {HttpClient} from '@angular/common/http';
+import {BooksRequest} from '../models/books-request';
 export class BooksDataSource implements DataSource<Book> {
 
   private booksSubject = new BehaviorSubject<Book[]>([]);
+  private totalCountSubject = new BehaviorSubject<number>(0);
 
-  constructor() {
-
+  public totalCount$ = this.totalCountSubject.asObservable();
+  constructor(private booksService: BooksService) {
   }
 
-  public loadBooks() {
-    console.log(BOOKS);
-    this.booksSubject.next(BOOKS)
+  public loadBooks(req: BooksRequest) {
+    this.booksService.loadBooks(req).pipe(
+      catchError((error) => {
+        console.log(error)
+       return of({ books: [], totalCount: 0 })
+      })
+    ).subscribe(resp => {
+      console.log("books arrived")
+      console.log(resp);
+      this.totalCountSubject.next(resp.totalCount);
+      this.booksSubject.next(resp.books);
+    });
   }
 
   connect(collectionViewer: CollectionViewer): Observable<Book[]> {

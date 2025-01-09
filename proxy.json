@@ -1,0 +1,6 @@
+{
+  "/books": {
+    "target": "https://localhost:7297",
+    "secure": false
+  }
+}
