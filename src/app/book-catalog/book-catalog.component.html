@@ -1,6 +1,6 @@
 <p>book-catalog works!</p>
 <mat-table  [dataSource]="dataSource"
-            matSort matSortActive="author" matSortDirection="asc" matSortDisableClear>
+            matSort matSortActive="title" matSortDirection="asc" matSortDisableClear>
 
   <ng-container matColumnDef="title">
     <mat-header-cell *matHeaderCellDef mat-sort-header>title</mat-header-cell>
@@ -13,7 +13,7 @@
   </ng-container>
 
   <ng-container matColumnDef="genre">
-    <mat-header-cell *matHeaderCellDef >genre</mat-header-cell>
+    <mat-header-cell *matHeaderCellDef mat-sort-header>genre</mat-header-cell>
     <mat-cell *matCellDef="let book">{{book.genre}}</mat-cell>
   </ng-container>
 

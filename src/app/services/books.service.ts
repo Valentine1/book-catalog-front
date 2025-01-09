@@ -13,8 +13,10 @@ export class BooksService {
     console.log("http start: ");
     return this.http.get<BooksResponse>('books', {
       params: new HttpParams()
-        .set('PageIndex', req.pageIndex.toString())
-        .set('PageSize', req.pageSize.toString())
+        .set('pageIndex', req.pageIndex.toString())
+        .set('pageSize', req.pageSize.toString())
+        .set('orderBy', req.orderBy)
+        .set('isAscending', req.isAscending)
     });
   }
 }

@@ -37,6 +37,7 @@ export class BookCatalogComponent implements OnInit, AfterViewInit, OnDestroy {
   booksService = inject(BooksService);
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
+  @ViewChild(MatSort) sort!: MatSort;
 
   private destroyed$ = new Subject<void>();
 
@@ -48,7 +49,8 @@ export class BookCatalogComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngAfterViewInit() {
     const triggers$ = merge(
-      this.paginator.page.pipe(map(() => ({type: 'page'})))
+      this.paginator.page.pipe(map(() => ({type: 'page'}))),
+      this.sort.sortChange.pipe(map(() => ({type: 'sort'}))),
     ).pipe(
       tap(({type}) => {
         if (type !== 'page') {
@@ -69,9 +71,12 @@ export class BookCatalogComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.paginator) {
       console.log("page index " + this.paginator.pageIndex);
     }
+    const sortDirection = this.sort?.direction ?? 'asc';
     const req: BooksRequest = {
       pageIndex: this.paginator?.pageIndex ?? 0,
-      pageSize: this.paginator?.pageSize ?? 3
+      pageSize: this.paginator?.pageSize ?? 3,
+      orderBy: this.sort?.active ?? 'title',
+      isAscending: sortDirection === 'asc' ? true : false
     }
     this.dataSource.loadBooks(req);
   }
