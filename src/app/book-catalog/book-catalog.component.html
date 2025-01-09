@@ -3,17 +3,38 @@
             matSort matSortActive="title" matSortDirection="asc" matSortDisableClear>
 
   <ng-container matColumnDef="title">
-    <mat-header-cell *matHeaderCellDef mat-sort-header>title</mat-header-cell>
+    <mat-header-cell *matHeaderCellDef >
+      <div class="header-cell-content">
+        <p mat-sort-header>Title</p>
+        <mat-form-field appearance="fill" subscriptSizing="dynamic">
+          <input matInput placeholder="Search title"   [formControl]='searchForm.get("title")! | toFormControl' >
+        </mat-form-field>
+      </div>
+    </mat-header-cell>
     <mat-cell *matCellDef="let book">{{book.title}}</mat-cell>
   </ng-container>
 
   <ng-container matColumnDef="author">
-    <mat-header-cell *matHeaderCellDef mat-sort-header>author</mat-header-cell>
+    <mat-header-cell *matHeaderCellDef >
+      <div class="header-cell-content">
+        <p mat-sort-header>Author</p>
+        <mat-form-field appearance="fill" subscriptSizing="dynamic">
+          <input matInput placeholder="Search author"  [formControl]='searchForm.get("author")! | toFormControl'>
+        </mat-form-field>
+      </div>
+    </mat-header-cell>
     <mat-cell *matCellDef="let book">{{book.author}}</mat-cell>
   </ng-container>
 
   <ng-container matColumnDef="genre">
-    <mat-header-cell *matHeaderCellDef mat-sort-header>genre</mat-header-cell>
+    <mat-header-cell *matHeaderCellDef >
+      <div class="header-cell-content">
+        <p mat-sort-header>Genre</p>
+        <mat-form-field appearance="fill" subscriptSizing="dynamic">
+          <input matInput placeholder="Search genre"  [formControl]='searchForm.get("genre")! | toFormControl'>
+        </mat-form-field>
+      </div>
+    </mat-header-cell>
     <mat-cell *matCellDef="let book">{{book.genre}}</mat-cell>
   </ng-container>
 

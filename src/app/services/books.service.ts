@@ -17,6 +17,9 @@ export class BooksService {
         .set('pageSize', req.pageSize.toString())
         .set('orderBy', req.orderBy)
         .set('isAscending', req.isAscending)
+        .set('titleSearch', req.titleSearch)
+        .set('authorSearch', req.authorSearch)
+        .set('genreSearch', req.genreSearch)
     });
   }
 }

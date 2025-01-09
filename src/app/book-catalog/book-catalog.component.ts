@@ -13,16 +13,21 @@ import {BooksService} from '../services/books.service';
 import {MatPaginator} from '@angular/material/paginator';
 import { MatSort, MatSortModule } from "@angular/material/sort";
 import {AsyncPipe, CommonModule} from '@angular/common';
-import {catchError, EMPTY, map, merge, Subject, takeUntil, tap} from 'rxjs';
+import {catchError, debounceTime, distinctUntilChanged, EMPTY, map, merge, Subject, takeUntil, tap} from 'rxjs';
 import {BooksRequest } from '../models/books-request';
-
+import {MatFormField} from '@angular/material/form-field';
+import {FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule} from '@angular/forms';
+import { MatInputModule } from '@angular/material/input';
+import { MatFormFieldModule } from "@angular/material/form-field";
+import { BookSearch } from '../models/book-search';
+import {ToFormControlPipe} from '../pipes/to-form-control.pipe';
 @Component({
   selector: 'app-book-catalog',
   imports: [
     MatTableModule, MatTable, MatHeaderCell, MatCell, MatHeaderRow, MatRow,
     MatHeaderRowDef, MatRowDef, MatCellDef, MatHeaderCellDef, MatPaginator,
-    MatSort, MatSortModule, CommonModule,
-    AsyncPipe],
+    MatSort, MatSortModule, CommonModule, MatInputModule, MatFormFieldModule,
+    AsyncPipe, MatFormField, FormsModule, ReactiveFormsModule, ToFormControlPipe],
   templateUrl: './book-catalog.component.html',
   providers: [
     { provide: BooksService, useClass: BooksService }
@@ -35,11 +40,23 @@ export class BookCatalogComponent implements OnInit, AfterViewInit, OnDestroy {
   displayedColumns = ['title', 'author', 'genre'];
 
   booksService = inject(BooksService);
+  searchForm: FormGroup;
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
   private destroyed$ = new Subject<void>();
+
+  constructor(
+    private fb: FormBuilder,
+  ) {
+    this.searchForm = this.fb.group<BookSearch>({
+      title: new FormControl('', {nonNullable: true}),
+      author: new FormControl('', {nonNullable: true}),
+      genre: new FormControl('', {nonNullable: true}),
+    });
+
+  }
 
   ngOnInit() {
 
@@ -51,6 +68,11 @@ export class BookCatalogComponent implements OnInit, AfterViewInit, OnDestroy {
     const triggers$ = merge(
       this.paginator.page.pipe(map(() => ({type: 'page'}))),
       this.sort.sortChange.pipe(map(() => ({type: 'sort'}))),
+      this.searchForm.valueChanges.pipe(
+        debounceTime(400),
+        distinctUntilChanged((prev, curr) => JSON.stringify(prev) === JSON.stringify(curr)),
+        map(() => ({ type: 'search' }))
+      )
     ).pipe(
       tap(({type}) => {
         if (type !== 'page') {
@@ -72,11 +94,15 @@ export class BookCatalogComponent implements OnInit, AfterViewInit, OnDestroy {
       console.log("page index " + this.paginator.pageIndex);
     }
     const sortDirection = this.sort?.direction ?? 'asc';
+    const searchCriteria = this.searchForm.controls as BookSearch;
     const req: BooksRequest = {
       pageIndex: this.paginator?.pageIndex ?? 0,
       pageSize: this.paginator?.pageSize ?? 3,
       orderBy: this.sort?.active ?? 'title',
-      isAscending: sortDirection === 'asc' ? true : false
+      isAscending: sortDirection === 'asc' ? true : false,
+      titleSearch: searchCriteria.title?.value ?? '',
+      authorSearch: searchCriteria.author?.value ?? '',
+      genreSearch: searchCriteria.genre?.value ?? ''
     }
     this.dataSource.loadBooks(req);
   }

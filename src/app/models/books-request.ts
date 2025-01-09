@@ -3,4 +3,7 @@ export interface BooksRequest {
   pageSize: number;
   orderBy: string;
   isAscending: boolean;
+  titleSearch: string;
+  authorSearch: string;
+  genreSearch: string;
 }
