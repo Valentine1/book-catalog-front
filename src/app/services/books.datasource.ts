@@ -1,6 +1,6 @@
 import {Book} from '../models/book';
 import {CollectionViewer, DataSource} from "@angular/cdk/collections";
-import {BehaviorSubject, catchError, Observable, of} from 'rxjs';
+import {BehaviorSubject, catchError, firstValueFrom, Observable, of} from 'rxjs';
 import {BooksService} from './books.service';
 import {BooksResponse} from '../models/books-response';
 import {inject} from '@angular/core';
@@ -15,18 +15,17 @@ export class BooksDataSource implements DataSource<Book> {
   constructor(private booksService: BooksService) {
   }
 
-  public loadBooks(req: BooksRequest) {
-    this.booksService.loadBooks(req).pipe(
-      catchError((error) => {
-        console.log(error)
-       return of({ books: [], totalCount: 0 })
-      })
-    ).subscribe(resp => {
-      console.log("books arrived")
-      console.log(resp);
-      this.totalCountSubject.next(resp.totalCount);
-      this.booksSubject.next(resp.books);
-    });
+  public async loadBooks(req: BooksRequest) {
+    const resp = await firstValueFrom(
+      this.booksService.loadBooks(req).pipe(
+        catchError((error) => {
+          console.log(error);
+          return of({books: [], totalCount: 0});
+        })
+      )
+    );
+    this.totalCountSubject.next(resp.totalCount);
+    this.booksSubject.next(resp.books);
   }
 
   connect(collectionViewer: CollectionViewer): Observable<Book[]> {

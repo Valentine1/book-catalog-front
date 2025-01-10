@@ -1,10 +1,14 @@
 import {inject, Injectable} from '@angular/core';
-import {HttpClient, HttpParams} from '@angular/common/http';
+import {HttpClient, HttpParams, HttpResponse} from '@angular/common/http';
 import {Observable} from 'rxjs';
 import {BooksResponse} from '../models/books-response';
 import {BooksRequest} from '../models/books-request';
+import {Book} from '../models/book';
+import {BookCreateRequest} from '../models/book-create-request';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class BooksService {
   http = inject(HttpClient);
 
@@ -22,4 +26,9 @@ export class BooksService {
         .set('genreSearch', req.genreSearch)
     });
   }
+
+  createBook(req: BookCreateRequest) : Observable<HttpResponse<any>> {
+    return this.http.post<any>('books', req, { observe: 'response' });
+  }
+
 }

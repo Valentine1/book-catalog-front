@@ -1,13 +1,16 @@
 <p>book-catalog works!</p>
-<mat-table  [dataSource]="dataSource"
-            matSort matSortActive="title" matSortDirection="asc" matSortDisableClear>
+<button class="btn" (click)="onAddCourse()">
+  ADD COURSE
+</button>
+<mat-table  [dataSource]="dataSource" [formGroup]="searchForm"
+            matSort matSortActive="title" matSortDirection="asc" matSortDisableClear >
 
   <ng-container matColumnDef="title">
     <mat-header-cell *matHeaderCellDef >
       <div class="header-cell-content">
         <p mat-sort-header>Title</p>
         <mat-form-field appearance="fill" subscriptSizing="dynamic">
-          <input matInput placeholder="Search title"   [formControl]='searchForm.get("title")! | toFormControl' >
+          <input matInput placeholder="Search title"  formControlName="title">
         </mat-form-field>
       </div>
     </mat-header-cell>
@@ -19,7 +22,7 @@
       <div class="header-cell-content">
         <p mat-sort-header>Author</p>
         <mat-form-field appearance="fill" subscriptSizing="dynamic">
-          <input matInput placeholder="Search author"  [formControl]='searchForm.get("author")! | toFormControl'>
+          <input matInput placeholder="Search author" formControlName="author">
         </mat-form-field>
       </div>
     </mat-header-cell>
@@ -31,7 +34,7 @@
       <div class="header-cell-content">
         <p mat-sort-header>Genre</p>
         <mat-form-field appearance="fill" subscriptSizing="dynamic">
-          <input matInput placeholder="Search genre"  [formControl]='searchForm.get("genre")! | toFormControl'>
+          <input matInput placeholder="Search genre" formControlName="genre">
         </mat-form-field>
       </div>
     </mat-header-cell>

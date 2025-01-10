@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, inject, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, inject, OnDestroy, OnInit, signal, ViewChild} from '@angular/core';
 import {
   MatCell, MatCellDef,
   MatHeaderCell, MatHeaderCellDef,
@@ -20,14 +20,16 @@ import {FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule} f
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from "@angular/material/form-field";
 import { BookSearch } from '../models/book-search';
-import {ToFormControlPipe} from '../pipes/to-form-control.pipe';
+import {openAddBookDialog} from '../add-book-dialog/add-book-dialog.component';
+import {MatDialog} from '@angular/material/dialog';
+
 @Component({
   selector: 'app-book-catalog',
   imports: [
     MatTableModule, MatTable, MatHeaderCell, MatCell, MatHeaderRow, MatRow,
     MatHeaderRowDef, MatRowDef, MatCellDef, MatHeaderCellDef, MatPaginator,
     MatSort, MatSortModule, CommonModule, MatInputModule, MatFormFieldModule,
-    AsyncPipe, MatFormField, FormsModule, ReactiveFormsModule, ToFormControlPipe],
+    AsyncPipe, MatFormField, FormsModule, ReactiveFormsModule ],
   templateUrl: './book-catalog.component.html',
   providers: [
     { provide: BooksService, useClass: BooksService }
@@ -40,30 +42,23 @@ export class BookCatalogComponent implements OnInit, AfterViewInit, OnDestroy {
   displayedColumns = ['title', 'author', 'genre'];
 
   booksService = inject(BooksService);
-  searchForm: FormGroup;
+  fb = inject(FormBuilder);
+  dialog = inject(MatDialog);
 
+  searchForm = this.fb.group<BookSearch>({
+    title: new FormControl('', {nonNullable: true}),
+    author: new FormControl('', {nonNullable: true}),
+    genre: new FormControl('', {nonNullable: true}),
+  });
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
   private destroyed$ = new Subject<void>();
 
-  constructor(
-    private fb: FormBuilder,
-  ) {
-    this.searchForm = this.fb.group<BookSearch>({
-      title: new FormControl('', {nonNullable: true}),
-      author: new FormControl('', {nonNullable: true}),
-      genre: new FormControl('', {nonNullable: true}),
-    });
-
-  }
-
   ngOnInit() {
-
     this.dataSource = new BooksDataSource(this.booksService);
     this.loadBooks();
   }
-
   ngAfterViewInit() {
     const triggers$ = merge(
       this.paginator.page.pipe(map(() => ({type: 'page'}))),
@@ -74,11 +69,11 @@ export class BookCatalogComponent implements OnInit, AfterViewInit, OnDestroy {
         map(() => ({ type: 'search' }))
       )
     ).pipe(
-      tap(({type}) => {
+      tap(async ({type}) => {
         if (type !== 'page') {
           this.paginator.pageIndex = 0;
         }
-        this.loadBooks();
+        await this.loadBooks();
       }),
       catchError(error => {
         console.error('Error loading lessons:', error);
@@ -88,11 +83,25 @@ export class BookCatalogComponent implements OnInit, AfterViewInit, OnDestroy {
     );
     triggers$.subscribe();
   }
-  private loadBooks() {
-    console.log("loading books")
-    if (this.paginator) {
-      console.log("page index " + this.paginator.pageIndex);
+
+  async onAddCourse() {
+    const newBookUrl= await openAddBookDialog(
+      this.dialog,
+      {
+        id: 0,
+        title: "Book 1",
+        author: "",
+        genre: ""
+      }
+    )
+    if (!newBookUrl) {
+      return;
     }
+    await this.loadBooks();
+  }
+
+  private async loadBooks() {
+    console.log("loading books")
     const sortDirection = this.sort?.direction ?? 'asc';
     const searchCriteria = this.searchForm.controls as BookSearch;
     const req: BooksRequest = {
@@ -104,7 +113,7 @@ export class BookCatalogComponent implements OnInit, AfterViewInit, OnDestroy {
       authorSearch: searchCriteria.author?.value ?? '',
       genreSearch: searchCriteria.genre?.value ?? ''
     }
-    this.dataSource.loadBooks(req);
+    await this.dataSource.loadBooks(req);
   }
 
   ngOnDestroy(): void {
