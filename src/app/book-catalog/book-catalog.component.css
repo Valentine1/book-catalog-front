@@ -11,3 +11,14 @@ h4 {
   display: flex;
   justify-content: center;
 }
+
+.actions-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.status-container {
+  display: flex;
+  flex-direction: row;
+}

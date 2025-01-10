@@ -1,7 +1,24 @@
 <p>book-catalog works!</p>
-<button class="btn" (click)="onAddCourse()">
-  ADD COURSE
-</button>
+<div class="actions-container">
+  <button class="btn" (click)="onAddCourse()">
+    ADD COURSE
+  </button>
+
+  <input
+    type="file"
+    accept=".csv"
+    (change)="onFileSelect($event)"
+  >
+</div>
+<div *ngIf="csvError" class="status-error">
+  {{ csvError }}
+</div>
+
+<div *ngIf="csvSuccess" class="status-success">
+  {{ csvSuccess }}
+</div>
+
+
 <mat-table  [dataSource]="dataSource" [formGroup]="searchForm"
             matSort matSortActive="title" matSortDirection="asc" matSortDisableClear >
 

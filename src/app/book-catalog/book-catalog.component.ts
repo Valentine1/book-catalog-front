@@ -13,7 +13,18 @@ import {BooksService} from '../services/books.service';
 import {MatPaginator} from '@angular/material/paginator';
 import { MatSort, MatSortModule } from "@angular/material/sort";
 import {AsyncPipe, CommonModule} from '@angular/common';
-import {catchError, debounceTime, distinctUntilChanged, EMPTY, map, merge, Subject, takeUntil, tap} from 'rxjs';
+import {
+  catchError,
+  debounceTime,
+  distinctUntilChanged,
+  EMPTY,
+  firstValueFrom,
+  map,
+  merge, of,
+  Subject,
+  takeUntil,
+  tap
+} from 'rxjs';
 import {BooksRequest } from '../models/books-request';
 import {MatFormField} from '@angular/material/form-field';
 import {FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule} from '@angular/forms';
@@ -25,6 +36,9 @@ import {MatDialog} from '@angular/material/dialog';
 import {MatIcon} from '@angular/material/icon';
 import {openEditBookDialog} from '../edit-book-dialog/edit-book-dialog.component';
 import {Book} from '../models/book';
+import {Papa} from 'ngx-papaparse';
+import {BookCreateRequest} from '../models/book-create-request';
+import {BooksCreateRequest} from '../models/books-create-request';
 
 @Component({
   selector: 'app-book-catalog',
@@ -44,9 +58,13 @@ export class BookCatalogComponent implements OnInit, AfterViewInit, OnDestroy {
   dataSource!: BooksDataSource;
   displayedColumns = ['title', 'author', 'genre', 'actions'];
 
+  csvError: string = '';
+  csvSuccess: string = '';
+
   booksService = inject(BooksService);
   fb = inject(FormBuilder);
   dialog = inject(MatDialog);
+  papa = inject(Papa);
 
   searchForm = this.fb.group<BookSearch>({
     title: new FormControl('', {nonNullable: true}),
@@ -106,6 +124,65 @@ export class BookCatalogComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
     await this.loadBooks();
+  }
+
+  async onFileSelect(event: any) {
+    this.csvError = ''
+    this.csvSuccess = '';
+    const file = event.target.files[0];
+    if (file && file.type === 'text/csv') {
+      try {
+        const books = await this.parseCsvFile(file);
+        if (books.length > 0) {
+          this.csvSuccess = `File parsed. Counts ${books.length}. Uploading`;
+          await this.uploadBooksBulk(books)
+        }
+        else {
+          this.csvError = 'File is empty'
+        }
+      } catch (err) {
+        this.csvError = 'File is not a valid csv';
+      }
+    } else {
+      this.csvError = 'Select proper file in .csv format'
+    }
+  }
+
+  async uploadBooksBulk(books: Partial<Book>[]) {
+    const bookReq: BooksCreateRequest = {
+      books: books
+    };
+
+    const booksUrl = await firstValueFrom(
+      this.booksService.createBooks(bookReq).pipe(
+        map(resp =>  resp.headers.get('Location')),
+        catchError((error) => {
+          console.log(error);
+          return of('');
+        } )
+      )
+    );
+    if(!booksUrl) {
+      this.csvError = 'Error uploading books';
+      return;
+    }
+    this.csvSuccess = `Books uploaded successfully`;
+    await this.loadBooks();
+  }
+
+  parseCsvFile(file: File): Promise<Partial<Book>[]> {
+    return new Promise((resolve, reject) => {
+      this.papa.parse(file, {
+        header: true,
+        complete: (result) => {
+          const books = result.data as Partial<Book>[];
+          resolve(books);
+        },
+        error: (error) => {
+          reject(error);
+        }
+      });
+    });
   }
 
   private async loadBooks() {
