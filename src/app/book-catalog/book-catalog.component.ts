@@ -86,7 +86,7 @@ export class BookCatalogComponent implements OnInit, AfterViewInit, OnDestroy {
       this.sort.sortChange.pipe(map(() => ({type: 'sort'}))),
       this.searchForm.valueChanges.pipe(
         debounceTime(400),
-        distinctUntilChanged((prev, curr) => JSON.stringify(prev) === JSON.stringify(curr)),
+        distinctUntilChanged(),
         map(() => ({ type: 'search' }))
       )
     ).pipe(
