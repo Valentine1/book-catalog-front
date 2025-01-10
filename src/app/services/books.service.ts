@@ -5,6 +5,7 @@ import {BooksResponse} from '../models/books-response';
 import {BooksRequest} from '../models/books-request';
 import {Book} from '../models/book';
 import {BookCreateRequest} from '../models/book-create-request';
+import {BookUpdateRequest} from '../models/book-update-request';
 
 @Injectable({
   providedIn: 'root'
@@ -29,6 +30,10 @@ export class BooksService {
 
   createBook(req: BookCreateRequest) : Observable<HttpResponse<any>> {
     return this.http.post<any>('books', req, { observe: 'response' });
+  }
+
+  updateBook(req: BookUpdateRequest) : Observable<HttpResponse<any>> {
+    return this.http.put<any>('books', req, { observe: 'response' });
   }
 
 }

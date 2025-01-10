@@ -1,0 +1,8 @@
+@import "../../styles";
+
+@include formStyles();
+
+.title {
+  display: flex;
+  justify-content: center;
+}

@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, inject, OnDestroy, OnInit, signal, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, inject, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {
   MatCell, MatCellDef,
   MatHeaderCell, MatHeaderCellDef,
@@ -22,6 +22,9 @@ import { MatFormFieldModule } from "@angular/material/form-field";
 import { BookSearch } from '../models/book-search';
 import {openAddBookDialog} from '../add-book-dialog/add-book-dialog.component';
 import {MatDialog} from '@angular/material/dialog';
+import {MatIcon} from '@angular/material/icon';
+import {openEditBookDialog} from '../edit-book-dialog/edit-book-dialog.component';
+import {Book} from '../models/book';
 
 @Component({
   selector: 'app-book-catalog',
@@ -29,7 +32,7 @@ import {MatDialog} from '@angular/material/dialog';
     MatTableModule, MatTable, MatHeaderCell, MatCell, MatHeaderRow, MatRow,
     MatHeaderRowDef, MatRowDef, MatCellDef, MatHeaderCellDef, MatPaginator,
     MatSort, MatSortModule, CommonModule, MatInputModule, MatFormFieldModule,
-    AsyncPipe, MatFormField, FormsModule, ReactiveFormsModule ],
+    AsyncPipe, MatFormField, FormsModule, ReactiveFormsModule, MatIcon],
   templateUrl: './book-catalog.component.html',
   providers: [
     { provide: BooksService, useClass: BooksService }
@@ -39,7 +42,7 @@ import {MatDialog} from '@angular/material/dialog';
 })
 export class BookCatalogComponent implements OnInit, AfterViewInit, OnDestroy {
   dataSource!: BooksDataSource;
-  displayedColumns = ['title', 'author', 'genre'];
+  displayedColumns = ['title', 'author', 'genre', 'actions'];
 
   booksService = inject(BooksService);
   fb = inject(FormBuilder);
@@ -86,15 +89,20 @@ export class BookCatalogComponent implements OnInit, AfterViewInit, OnDestroy {
 
   async onAddCourse() {
     const newBookUrl= await openAddBookDialog(
-      this.dialog,
-      {
-        id: 0,
-        title: "Book 1",
-        author: "",
-        genre: ""
-      }
+      this.dialog
     )
     if (!newBookUrl) {
+      return;
+    }
+    await this.loadBooks();
+  }
+
+  async editBook(book: Book) {
+    const editStatus = await openEditBookDialog(
+      this.dialog,
+      book
+    )
+    if (!editStatus) {
       return;
     }
     await this.loadBooks();

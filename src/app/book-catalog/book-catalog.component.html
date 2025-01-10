@@ -8,7 +8,7 @@
   <ng-container matColumnDef="title">
     <mat-header-cell *matHeaderCellDef >
       <div class="header-cell-content">
-        <p mat-sort-header>Title</p>
+        <h4 mat-sort-header>Title</h4>
         <mat-form-field appearance="fill" subscriptSizing="dynamic">
           <input matInput placeholder="Search title"  formControlName="title">
         </mat-form-field>
@@ -20,7 +20,7 @@
   <ng-container matColumnDef="author">
     <mat-header-cell *matHeaderCellDef >
       <div class="header-cell-content">
-        <p mat-sort-header>Author</p>
+        <h4 mat-sort-header>Author</h4>
         <mat-form-field appearance="fill" subscriptSizing="dynamic">
           <input matInput placeholder="Search author" formControlName="author">
         </mat-form-field>
@@ -32,13 +32,22 @@
   <ng-container matColumnDef="genre">
     <mat-header-cell *matHeaderCellDef >
       <div class="header-cell-content">
-        <p mat-sort-header>Genre</p>
+        <h4 mat-sort-header>Genre</h4>
         <mat-form-field appearance="fill" subscriptSizing="dynamic">
           <input matInput placeholder="Search genre" formControlName="genre">
         </mat-form-field>
       </div>
     </mat-header-cell>
     <mat-cell *matCellDef="let book">{{book.genre}}</mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="actions">
+    <mat-header-cell *matHeaderCellDef></mat-header-cell>
+    <mat-cell *matCellDef="let book">
+      <button mat-icon-button color="primary" (click)="editBook(book)">
+        <mat-icon>edit</mat-icon>
+      </button>
+    </mat-cell>
   </ng-container>
 
   <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>

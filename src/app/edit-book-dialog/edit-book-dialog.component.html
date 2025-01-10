@@ -1,0 +1,32 @@
+<div class="book-dialog" [formGroup]="form">
+  <h3 class="title">Edit Book</h3>
+  <div class="form-control">
+    <label>Title:</label>
+    <input placeholder="Enter title"
+           formControlName="title">
+  </div>
+  <div class="form-control">
+    <label>Author:</label>
+    <input placeholder="Enter author"
+           formControlName="author">
+  </div>
+
+  <div class="form-control">
+    <label>Genre:</label>
+    <input placeholder="Enter genre"
+           formControlName="genre">
+  </div>
+
+  <div class="form-actions">
+
+    <button class="btn" (click)="updateBook()">
+      Save
+    </button>
+
+    <button class="btn" (click)="close()">
+      Cancel
+    </button>
+
+  </div>
+
+</div>

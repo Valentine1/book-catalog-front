@@ -1,6 +1,6 @@
 import {Component, inject} from '@angular/core';
 import {FormBuilder, ReactiveFormsModule} from '@angular/forms';
-import {MAT_DIALOG_DATA, MatDialog, MatDialogConfig, MatDialogRef} from '@angular/material/dialog';
+import {MatDialog, MatDialogConfig, MatDialogRef} from '@angular/material/dialog';
 import {Book} from '../models/book';
 import {BooksService} from '../services/books.service';
 import {catchError, firstValueFrom, map, of} from 'rxjs';
@@ -15,7 +15,6 @@ import {BookCreateRequest} from '../models/book-create-request';
 })
 export class AddBookDialogComponent {
   dialogRef = inject(MatDialogRef);
-  data: Book = inject(MAT_DIALOG_DATA);
   booksService =inject(BooksService);
   fb = inject(FormBuilder);
 
@@ -24,14 +23,6 @@ export class AddBookDialogComponent {
     author: [''],
     genre: ['']
   });
-
-  constructor() {
-    this.form.patchValue({
-      title: this.data?.title,
-      author: this.data?.author,
-      genre: this.data?.genre
-    });
-  }
 
   async createBook() {
     const bookReq: BookCreateRequest = {
@@ -57,13 +48,11 @@ export class AddBookDialogComponent {
 }
 
 export async function openAddBookDialog(
-  dialog: MatDialog,
-  data: Book) {
+  dialog: MatDialog) {
   const config = new MatDialogConfig();
   config.disableClose = true;
   config.autoFocus = true;
   config.width  = "400px";
-  config.data = data;
 
   const result$ = dialog.open(
     AddBookDialogComponent,
