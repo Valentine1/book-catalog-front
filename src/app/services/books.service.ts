@@ -34,11 +34,7 @@ export class BooksService {
   }
 
   createBooks(req: BooksCreateRequest) : Observable<HttpResponse<any>> {
-    return this.http.post<any>('booksbulk', req, {
-      params: new HttpParams()
-        .set('type', 'bulk'),
-      observe: 'response'
-    });
+    return this.http.post<any>('books/upload', req, { observe: 'response'});
   }
 
   updateBook(req: BookUpdateRequest) : Observable<HttpResponse<any>> {
